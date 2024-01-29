@@ -1,0 +1,25 @@
+.navbarItem a {
+    color: black;
+    font-size: 20px;
+    transition: 0.3s ease-in-out;
+}
+.navbarItem a:hover {
+    color: white;
+}
+.writeForTodayBtn{
+    justify-content: center;
+    align-items: center;
+    margin-left: 20px;
+    background: rgb(0, 0, 129);
+    width: 160px; 
+    height: 35px;
+    color: white;
+    padding: 2px;
+    border-radius: 20px;
+    transition: 0.3s ease-in-out;
+}
+
+.writeForTodayBtn:hover {
+    background: #6600af;
+    cursor: pointer;
+}
