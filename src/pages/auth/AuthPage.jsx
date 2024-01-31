@@ -16,7 +16,7 @@ import { getFirestore, collection, addDoc, doc, setDoc } from "firebase/firestor
 const AuthPage = () => {
 
 
-  let user = null;
+  
 
 
   const [username, setUsername] = useState("")
@@ -24,7 +24,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState("");
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
-
+  let user = null;
 
   const firebaseConfig = {
     apiKey: "AIzaSyACkCTvtbzjAYUXWFCZVQkmHIj9oDmGmDQ",

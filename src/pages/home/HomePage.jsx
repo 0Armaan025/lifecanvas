@@ -3,6 +3,8 @@ import './homepage.css';
 import Navbar from '../../components/navbar/Navbar';
 import MiddlePart from './middlePart/MiddlePart';
 
+
+
 const HomePage = () => {
   return (
     <>

@@ -1,7 +1,39 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './middlepart.css';
 
+import { initializeApp } from "firebase/app";
+import { Link } from 'react-router-dom';
+import {
+  GoogleAuthProvider,
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { getStorage, ref, uploadBytesResumable, } from "firebase/storage";
+import { getFirestore, collection, addDoc, doc, setDoc } from "firebase/firestore";
+
 const MiddlePart = () => {
+
+  let user = null;
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyACkCTvtbzjAYUXWFCZVQkmHIj9oDmGmDQ",
+    authDomain: "lifecanvas-11e.firebaseapp.com",
+    projectId: "lifecanvas-11e",
+    storageBucket: "lifecanvas-11e.appspot.com",
+    messagingSenderId: "830599258206",
+    appId: "1:830599258206:web:929be923aa6eb922c654cf",
+    measurementId: "G-GMD8LBH8X6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  
+
+
   return (
     <>
      <div className="boxes">
@@ -11,7 +43,9 @@ const MiddlePart = () => {
             <h4 className='mt-32, font-semibold text-xl mt-32 mr-72' style={{fontFamily: "poppins", marginTop: "42px"}}> Your own personal journal to write your thoughts, feelings, ideas, attach graphics, and a lot more! </h4>
             <br/>
             <center>
-              <button className='getStartedBtn overflow-hidden'>Get Started!</button>
+            <Link to={auth.currentUser ? '/write-journal/' : '/auth'}>
+      <button className='getStartedBtn overflow-hidden'>Get Started!</button>
+    </Link>
               </center>
             <br/>
             <hr style={{width: "100%", height: "1px", color: "black"}}/>
