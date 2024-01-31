@@ -4,12 +4,12 @@
 }
 .journalEntry {
     
-        width: 300px; /* Adjust the width as needed */
+        width: 800px; /* Adjust the width as needed */
         height: 100px; /* Adjust the height as needed */
         padding: 8px;
         border-radius:8px;
-        resize: none;
+        /* resize: none; */
         margin-bottom: 20px;
-        overflow-y: auto;
+        /* overflow-y: auto; */
       
 }

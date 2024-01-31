@@ -8,7 +8,7 @@ import ProfilePage from "./pages/profile/ProfilePage";
 function App() {
 
   return (
-    <ProfilePage/>
+    <HomePage/>
   );
 }
 

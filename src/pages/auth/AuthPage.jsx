@@ -51,6 +51,7 @@ const AuthPage = () => {
 
       if (image != null) {
         const storageRef = ref(storage, `files/${user.uid}/${image.name}`);
+        
         const uploadTask = uploadBytesResumable(storageRef, image);
 
         uploadTask.on("state_changed",
@@ -63,17 +64,22 @@ const AuthPage = () => {
             alert(error);
           },
           () => {
-            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-              setImageUrl(downloadURL);
-
-            });
+            
           }
         );
       }
 
 
       if (imageUrl == '') {
-
+        const userData = {
+          uid: user.uid,
+          username: username,
+          password: password,
+          email: email,
+          imageUrl: '',        
+          }
+        console.log('trying');
+        await setDoc(specificDocRef, userData);
       }
       else {
         const userData = {
@@ -81,6 +87,7 @@ const AuthPage = () => {
           username: username,
           password: password,
           email: email,
+          imageUrl: imageUrl,
         }
         console.log('trying');
         await setDoc(specificDocRef, userData);
@@ -199,7 +206,7 @@ const AuthPage = () => {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full  p-8 rounded-md shadow-md">
-          <h2 className="text-4xl font-extrabold text-center text-black mb-6" style={{ fontFamily: "poppins" }}>
+          <h2 className="text-4xl font-extrabold text-center overflow-hidden text-black mb-6" style={{ fontFamily: "poppins" }}>
             {isLogin ? 'Login' : 'Sign Up'}
           </h2>
           <form className="space-y-4" onSubmit={handleSubmit}>

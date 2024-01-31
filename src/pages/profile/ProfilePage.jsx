@@ -1,19 +1,117 @@
 // ProfilePage.jsx
 import React, { useState, useRef, useEffect } from 'react';
+import './profilepage.css';
+import { initializeApp } from "firebase/app";
+
+import {
+  GoogleAuthProvider,
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "firebase/firestore";
+import Navbar from '../../components/navbar/Navbar';
 
 const ProfilePage = () => {
+
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyACkCTvtbzjAYUXWFCZVQkmHIj9oDmGmDQ",
+    authDomain: "lifecanvas-11e.firebaseapp.com",
+    projectId: "lifecanvas-11e",
+    storageBucket: "lifecanvas-11e.appspot.com",
+    messagingSenderId: "830599258206",
+    appId: "1:830599258206:web:929be923aa6eb922c654cf",
+    measurementId: "G-GMD8LBH8X6"
+  };
+
+
+
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  let ourUser = null;
+  
+
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('Current Username');
   const [newEmail, setNewEmail] = useState('Current Email');
-  const [newPassword, setNewPassword] = useState('********');
+  
   const [profilePicture, setProfilePicture] = useState('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwVLdSDmgrZN7TkzbHJb8dD0_7ASUQuERL2A&usqp=CAU');
   const fileInputRef = useRef(null);
 
-  const handleSave = () => {
-    // Implement save functionality here
-    setIsEditing(false);
-    // Optionally, you can send updated data to the server
+  const handleSave = async () => {
+    try {
+
+      ourUser = auth.currentUser;
+
+      if (!ourUser) {
+        console.log("User not authenticated");
+        return;
+      }
+
+      const specificDocRef = doc(db, "users", ourUser.uid.toString());
+      const docSnapshot = await getDoc(specificDocRef);
+
+      if (docSnapshot.exists()) {
+        const userData = docSnapshot.data();
+
+        await setDoc(specificDocRef, {
+          username: newUsername,
+          email: newEmail,
+          uid: ourUser.uid,
+          password: userData.password,
+          imageUrl: profilePicture,
+        });
+
+        setIsEditing(false);
+
+        console.log("User data updated successfully");
+      } else {
+        console.log("Document does not exist");
+      }
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
   };
+  
+  
+
+  const getDataFromServer = async () => {
+      
+
+    
+      const specificDocRef = doc(db, "users", ourUser.uid.toString());
+      const docSnapshot = await getDoc(specificDocRef);
+  
+      if (docSnapshot.exists()) {
+        const userData = docSnapshot.data();
+
+        console.log("we got the data", userData);
+
+        setNewUsername(userData.username);
+        setNewEmail(userData.email);
+
+        if(userData.imageUrl!='') {
+          setProfilePicture(userData.profilePicture);
+        } 
+
+        
+        
+        console.log(userData);
+      } else {
+        console.log("Document does not exist");
+      }
+    }
+   
+
+   
+
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -40,26 +138,39 @@ const ProfilePage = () => {
 
   // Close editing fields when the component mounts
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        ourUser = user;
+        getDataFromServer();
+      } else {
+        console.log('User is not signed in.');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth]); 
+  
 
   return (
-    <div className="container mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
-      <div className="flex items-center">
+    <>
+    <Navbar/>
+
+    <center>
+      <h4 className='font-bold text-4xl mt-4 color-white overflow-hidden' style={{fontFamily: "Poppins", textShadow: "2px 1px 3px yellow"}}>Time to update profile! :D</h4>
+    </center>
+    <div className="container mt-4 p-4 m-2 mr-16 bg-green-400 shadow-lg rounded-lg" style={{ margin: "20px", marginRight: "80px" }}>
+      <div className="flex items-center mr-8">
         {/* Profile Picture */}
-        <div className="mr-8">
+        <div className="mr-8 ml-12" style={{ marginLeft: "14px", marginTop: "30px" }}>
           <img
             src={profilePicture}
             alt="Profile"
-            className="w-24 h-24 rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+            className="w-24 ml-5 h-24 rounded-full cursor-pointer hover:opacity-80 transition-opacity"
             onClick={handleImageChange}
           />
           {/* Edit profile picture */}
           <span
-            className="mt-2 block text-center text-blue-500 hover:text-blue-700 cursor-pointer"
+            className="mt-2 block text-center text-white cursor-pointer"
             onClick={handleImageChange}
           >
             Change Picture
@@ -77,7 +188,7 @@ const ProfilePage = () => {
         {/* User Details */}
         <div>
           {/* Username */}
-          <div className="mb-4">
+          <div className="mb-4 mt-4">
             <span className="font-semibold text-lg">Username:</span>
             {isEditing ? (
               <input
@@ -91,7 +202,7 @@ const ProfilePage = () => {
             )}
             {/* Edit username */}
             <span
-              className="block mt-2 text-blue-500 hover:text-blue-700 cursor-pointer"
+              className="block mt-2 text-white cursor-pointer"
               onClick={() => setIsEditing(!isEditing)}
             >
               Edit Username
@@ -113,47 +224,30 @@ const ProfilePage = () => {
             )}
             {/* Edit email */}
             <span
-              className="block mt-2 text-blue-500 hover:text-blue-700 cursor-pointer"
+              className="block mt-2 text-white cursor-pointer"
               onClick={() => setIsEditing(!isEditing)}
             >
               Edit Email
             </span>
           </div>
 
-          {/* Password */}
-          <div className="mb-4">
-            <span className="font-semibold text-lg">Password:</span>
-            {isEditing ? (
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="block w-full mt-2 p-2 border-b-2 border-blue-500 outline-none focus:border-blue-700"
-              />
-            ) : (
-              <span className="text-lg ml-2">{newPassword}</span>
-            )}
-            {/* Edit password */}
-            <span
-              className="block mt-2 text-blue-500 hover:text-blue-700 cursor-pointer"
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              Change Password
-            </span>
-          </div>
+         
 
           {/* Save button */}
           {isEditing && (
             <button
-              className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+              className="bg-blue-500 text-white py-2 mb-16 px-4 rounded-md hover:bg-blue-700"
               onClick={handleSave}
             >
               Save
             </button>
+            
           )}
+          <br/>
         </div>
       </div>
     </div>
+    </>
   );
 };
 

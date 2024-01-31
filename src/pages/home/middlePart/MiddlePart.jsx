@@ -7,11 +7,11 @@ const MiddlePart = () => {
      <div className="boxes">
 
             
-            <h2 className='glowingText font-bold text-5xl mt-32 mr-72' style={{fontFamily: 'Poppins',marginTop: "32px", marginRight: "432px"}}> Welcome to LifeCanvas, lego! </h2>
+            <h2 className='glowingText font-bold text-5xl mt-32 mr-72 overflow-hidden' style={{fontFamily: 'Poppins',marginTop: "32px", marginRight: "432px"}}> Welcome to LifeCanvas, lego! </h2>
             <h4 className='mt-32, font-semibold text-xl mt-32 mr-72' style={{fontFamily: "poppins", marginTop: "42px"}}> Your own personal journal to write your thoughts, feelings, ideas, attach graphics, and a lot more! </h4>
             <br/>
             <center>
-              <button className='getStartedBtn'>Get Started!</button>
+              <button className='getStartedBtn overflow-hidden'>Get Started!</button>
               </center>
             <br/>
             <hr style={{width: "100%", height: "1px", color: "black"}}/>
@@ -31,6 +31,8 @@ const MiddlePart = () => {
 
                 <center>
                   <h4 className='text-3xl font-bold'> And more coming soon...!</h4>
+                  <br/>
+                  <br/>
                 </center>
             </div>
 

@@ -52,46 +52,66 @@ const JournalPage = () => {
 
   const submitJournal = async () => {
     let user = auth.currentUser;
-  
+
     if (user !== null) {
-      if (selectedFile != null) {
-        const storageRef = ref(storage, `files/journalpics/${user.uid}/${getCurrentDateTime()}/${selectedFile.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-  
-        uploadTask.on("state_changed",
-          (snapshot) => {
-            const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-          },
-          (error) => {
-            alert(error);
-          },
-          async () => {
-            try {
-              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              setImageUrl(downloadURL);
-            } catch (error) {
-              console.error("Error getting download URL:", error);
-            }
-          }
-        );
-      }
-  
-      const specificDocRef = doc(db, "journal", getCurrentDateTime());
-  
-      const userData = {
-        uid: user.uid,
-        journalText: entryText,
-        dateTime: getCurrentDateTime().toString(),
-        imageUrl: imageUrl || 'No image submitted',
-      };
-  
       try {
-        await setDoc(specificDocRef, userData);
+        if (selectedFile != null) {
+          const storageRef = ref(storage, `files/journalpics/${user.uid}/${getCurrentDateTime()}/${selectedFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+          uploadTask.on(
+            'state_changed',
+            (snapshot) => {
+              const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+              // Handle progress if needed
+            },
+            (error) => {
+              alert(error);
+            },
+            async () => {
+              try {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                setImageUrl(downloadURL);
+                
+                // After setting imageUrl, you can save the entry
+                saveJournalEntry(user.uid);
+              } catch (error) {
+                console.error('Error getting download URL:', error);
+              }
+            }
+          );
+        } else {
+          // If no image is selected, save the entry directly
+          saveJournalEntry(user.uid);
+        }
       } catch (error) {
-        console.error("Error setting document:", error);
+        console.error('Error submitting journal:', error);
       }
     }
   };
+
+  const saveJournalEntry = async (uid) => {
+    const specificDocRef = doc(db, 'journal', getCurrentDateTime());
+
+    const userData = {
+      uid: uid,
+      journalText: entryText,
+      dateTime: getCurrentDateTime().toString(),
+      imageUrl: imageUrl || 'No image submitted',
+    };
+
+    try {
+      await setDoc(specificDocRef, userData);
+      // Clear the form after successfully saving
+      setEntryText('');
+      setSelectedFile(null);
+      setImageUrl('');
+    } catch (error) {
+      console.error('Error setting document:', error);
+    }
+  };
+
+
   
 
 
@@ -115,7 +135,7 @@ const JournalPage = () => {
       <center>
         <div className="journal-container p-8 ml-2 mr-2 " style={{ width: '650px', height: '480px' }}>
           <div className="journal-header mb-6">
-            <h1 className="text-3xl font-semibold color-black" style={{ fontFamily: 'Poppins' }}>
+            <h1 className="text-3xl font-semibold color-black overflow-hidden" style={{ fontFamily: 'Poppins' }}>
               My Journal
             </h1>
             <p className="text-gray-black mt-4">{getCurrentDateTime()}</p>
@@ -123,18 +143,18 @@ const JournalPage = () => {
 
           <div className="journal-entry p-4 rounded-md shadow-md">
             <div className="double-page">
-              <div className="left-page pr-2" style={{ width: '40px', marginRight: '400px' }}>
+            <div className="left-page pr-2">
+  <input
+    type="text"
+    className='journalEntry'
+    onKeyDown={handleKeyDown}
+    value={entryText}
+    onChange={handleTextChange}
+    placeholder='Write your thoughts here....'
+    style={{ width: '100%', marginRight: 0 }} // Add or modify styles here
+  />
+</div>
 
-                <input type="text" className='journalEntry' onKeyDown={handleKeyDown} value={entryText} onChange={handleTextChange} placeholder='Write your thoughts here....' />
-                <br />
-                {/* <textarea
-                  style={{ width: '450px' }}
-                  value={entryText}
-                  onChange={handleTextChange}
-                  placeholder="Write your thoughts here..."
-                  className="entry-textarea h-80 p-2 border rounded-md mb-4 resize-none"
-                ></textarea> */}
-              </div>
             </div>
 
             <div className="mb-4">
